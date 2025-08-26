@@ -1,9 +1,3 @@
-# Processing-in-Interconnect-Codes
-
-This repository contains implementations of **π² (Processing-in-Interconnect)** neural network layers and architectures, along with training/evaluation scripts on MNIST, Fashion-MNIST, and CIFAR datasets. The project leverages [Lightning Fabric](https://lightning.ai/docs/fabric/stable/) for distributed training, mixed precision, and scaling across GPUs.
-
----
-
 ## 🔧 Environment Setup
 
 We recommend using **conda**:
@@ -19,4 +13,3 @@ pip install torch torchvision lightning fabric deepspeed
 # Clone this repository
 git clone https://github.com/<your-username>/Processing-in-Interconnect-Codes.git
 cd Processing-in-Interconnect-Codes
-'''
