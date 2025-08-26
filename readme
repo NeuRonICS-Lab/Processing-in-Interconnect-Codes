@@ -8,7 +8,7 @@ This repository contains implementations of **π² (Processing-in-Interconnect)*
 
 We recommend using **conda**:
 
-```python
+```bash
 # Create a fresh environment
 conda create -n fabric2 python==3.10 -y
 conda activate fabric2
@@ -19,3 +19,4 @@ pip install torch torchvision lightning fabric deepspeed
 # Clone this repository
 git clone https://github.com/<your-username>/Processing-in-Interconnect-Codes.git
 cd Processing-in-Interconnect-Codes
+'''
