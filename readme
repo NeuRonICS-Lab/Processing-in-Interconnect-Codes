@@ -7,10 +7,11 @@ This repository contains implementations of **π² (Processing-in-Interconnect)*
 
 We recommend using **conda**:
 
-```bash
+```
 # Create a fresh environment
 conda create -n fabric2 python==3.10 -y
 conda activate fabric2
+```
 
 # Install dependencies
 pip install torch torchvision lightning fabric deepspeed
