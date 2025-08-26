@@ -33,7 +33,7 @@ Processing-in-Interconnect-Codes/
 
 
 To reproduce the MNIST experiment results run
-python MNIST_EXP/MNIST_EXP/fabric_PI2_1.py --current_dir /path/to/Processing-in-Interconnect-Codes
+python MNIST_EXP/fabric_PI2_1.py --current_dir /path/to/Processing-in-Interconnect-Codes
 
 To reproduce the FMNIST experiment results run
 python FMNIST_EXP/pi_2_train.py --current_dir /path/to/Processing-in-Interconnect-Codes
