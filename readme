@@ -35,4 +35,8 @@ python MNIST_EXP/MNIST_EXP/fabric_PI2_1.py --current_dir /path/to/Processing-in-
 To reproduce the FMNIST experiment results run
 python FMNIST_EXP/pi_2_train.py --current_dir /path/to/Processing-in-Interconnect-Codes
 
-​
+To reproduce the CIFAR100 experiment results run
+python CIFAR100_EXP/pi_2_train.py --current_dir /path/to/Processing-in-Interconnect-Codes
+
+​To reproduce the CIFAR10 experiment results run
+python CIFAR10_EXP/pi_2_train.py --current_dir /path/to/Processing-in-Interconnect-Codes
