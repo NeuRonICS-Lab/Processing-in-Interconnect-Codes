@@ -26,6 +26,8 @@ Processing-in-Interconnect-Codes/
 ├── network_arch/         # Network definitions (ResNet9, LeNet, TEMP-MLP, etc.)
 ├── MNIST_EXP/            # Training/eval scripts for MNIST experiments
 ├── FMNIST_EXP/           # Training/eval scripts for Fashion-MNIST experiments
+├── CIFAR10_EXP/            # Training/eval scripts for MNIST experiments
+├── CIFAR100_EXP/           # Training/eval scripts for Fashion-MNIST experiment
 ├── Trained_models/       # Pretrained checkpoints (saved after training)
 └── README.md             # (this file)
 
