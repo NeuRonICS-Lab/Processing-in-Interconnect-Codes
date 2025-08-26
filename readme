@@ -1,1 +1,13 @@
+Processing-in-Interconnect-Codes
 
+This repository contains implementations of π² (Processing-in-Interconnect) neural network layers and architectures, along with training/evaluation scripts on MNIST, Fashion-MNIST, and CIFAR datasets. The project leverages Lightning Fabric
+for distributed training, mixed precision, and scaling across GPUs.
+
+🔧 Environment Setup
+We recommend using conda:
+# Create a fresh environment
+conda create -n fabric2 python==3.10 -y
+conda activate fabric2
+
+# Install dependencies
+pip install torch torchvision lightning fabric deepspeed
