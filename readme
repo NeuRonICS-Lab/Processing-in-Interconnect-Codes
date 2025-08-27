@@ -20,14 +20,15 @@ pip install torch torchvision lightning fabric deepspeed
 git clone https://github.com/NeuRonICS-Lab/Processing-in-Interconnect-Codes.git
 cd Processing-in-Interconnect-Codes
 
+This repo contains the following directories
 Processing-in-Interconnect-Codes/
 │
 ├── PI2_Layers/           # TEMP / π² custom PyTorch layers (Conv, FC, MLP blocks)
 ├── network_arch/         # Network definitions (ResNet9, LeNet, TEMP-MLP, etc.)
 ├── MNIST_EXP/            # Training/eval scripts for MNIST experiments
 ├── FMNIST_EXP/           # Training/eval scripts for Fashion-MNIST experiments
-├── CIFAR10_EXP/            # Training/eval scripts for MNIST experiments
-├── CIFAR100_EXP/           # Training/eval scripts for Fashion-MNIST experiment
+├── CIFAR10_EXP/          # Training/eval scripts for CIFAR10 experiments
+├── CIFAR100_EXP/         # Training/eval scripts for CIFAR100 experiment
 ├── Trained_models/       # Pretrained checkpoints (saved after training)
 └── README.md             # (this file)
 
@@ -35,11 +36,23 @@ Processing-in-Interconnect-Codes/
 To reproduce the MNIST experiment results run
 python MNIST_EXP/fabric_PI2_1.py --current_dir /path/to/Processing-in-Interconnect-Codes
 
-To reproduce the FMNIST experiment results run
+To reproduce the FMNIST training experiment results run
 python FMNIST_EXP/pi_2_train.py --current_dir /path/to/Processing-in-Interconnect-Codes
 
-To reproduce the CIFAR100 experiment results run
+To reproduce the CIFAR100 training experiment results run
 python CIFAR100_EXP/pi_2_train.py --current_dir /path/to/Processing-in-Interconnect-Codes
 
-​To reproduce the CIFAR10 experiment results run
+​To reproduce the CIFAR10 training experiment results run
 python CIFAR10_EXP/pi_2_train.py --current_dir /path/to/Processing-in-Interconnect-Codes
+
+Run inference directly on saved π²-NN models
+You can evaluate checkpoints without retraining:
+# CIFAR-100
+python CIFAR100_EXP/pi_2_inf1.py \
+  --current_dir /path/to/Processing-in-Interconnect-Codes \
+  --ckpt Trained_models/CIFAR100/ResNet9_cifar100_k_new_new.pt
+
+# CIFAR-10
+python CIFAR10_EXP/pi_2_inf2.py \
+  --current_dir /path/to/Processing-in-Interconnect-Codes \
+  --ckpt Trained_models/CIFAR10/ResNet9_cifar10_k_new.pt
