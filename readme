@@ -58,3 +58,8 @@ python CIFAR10_EXP/pi_2_inf2.py \
   --ckpt Trained_models/CIFAR10/ResNet9_cifar10_k_new.pt
 
 
+``` python
+git clone https://github.com/KellerJordan/cifar10-airbench.git
+cd cifar10-airbench
+python airbench94_muon.py
+```
