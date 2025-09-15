@@ -7,7 +7,7 @@ This repository contains implementations of **π² (Processing-in-Interconnect)*
 
 We recommend using Conda. Create a new environment. 
 ```
-conda create -n fabric2 python==3.10 -y
+conda create -n fabric python==3.10 -y
 conda activate fabric
 ```
 
@@ -53,14 +53,15 @@ python CIFAR10_EXP/pi_2_train.py --current_dir /path/to/Processing-in-Interconne
 
 Run inference directly on saved π²-NN models
 You can evaluate checkpoints without retraining:
-# CIFAR-100
+
 ```
 python CIFAR100_EXP/pi_2_inf1.py \
   --current_dir /path/to/Processing-in-Interconnect-Codes \
   --ckpt Trained_models/CIFAR100/ResNet9_cifar100_k_new_new.pt
 ```
 
-# CIFAR-10
+```
 python CIFAR10_EXP/pi_2_inf2.py \
   --current_dir /path/to/Processing-in-Interconnect-Codes \
   --ckpt Trained_models/CIFAR10/ResNet9_cifar10_k_new.pt
+```
