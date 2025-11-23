@@ -31,7 +31,7 @@ results_dir = os.path.join(current_dir, 'Trained_models')
 sys.path.append(results_dir)
 # ───────────── PATH SETUP ─────────────
 sys.path.append(arch_dir)
-from resnet_9 import ResNet9_100_temp1,ResNet9_T
+from resnet_9 import ResNet9_100_temp1
 
 torch.manual_seed(3407)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
