@@ -1,1 +1,1 @@
-
+Before training PI2 ResNet-9 network on CIFAR10, please unzip ResNet9_cifar10_cutout.7z (to load the trained teacher model)
