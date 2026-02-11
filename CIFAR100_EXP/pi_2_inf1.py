@@ -15,9 +15,8 @@ from torchmetrics.classification import Accuracy
 # ───────────── Argument Parser ─────────────
 parser = argparse.ArgumentParser(description="Evaluate quantized ResNet9 with temp noise on CIFAR10")
 parser.add_argument("--current_dir", type=str, default= "/home/madhu/TEMP_FINAL_CODES", help="Path to dataset directory")
-parser.add_argument("--data_dir", type=str, required=True, help="Path to dataset directory")
 parser.add_argument("--checkpoint", type=str, required=True, help="Path to student model checkpoint (.pt)")
-parser.add_argument("--n_bits", type=int, default=4, help="Number of bits for symmetric quantization")
+parser.add_argument("--n_bits", type=int, default=32, help="Number of bits for symmetric quantization")
 parser.add_argument("--std", type=float, default=0.0, help="Standard deviation of additive noise in temp blocks")
 parser.add_argument("--device_ids", type=int, nargs='+', default=[0], help="CUDA device IDs for Fabric")
 parser.add_argument("--batch_size", type=int, default=16, help="Batch size for evaluation")
@@ -31,7 +30,7 @@ sys.path.append(arch_dir)
 data_dir = os.path.join(current_dir, 'Datasets')
 sys.path.append(data_dir)
 
-from resnet_9 import ResNet9_100_temp_noise
+from resnet_9 import ResNet9_100_temp_noise, ResNet9_100_temp1
 
 # ───────────── Cutout Augmentation ─────────────
 class Cutout(object):
@@ -74,7 +73,7 @@ def evaluate(fabric, model, dataloader):
 
 # ───────────── Main Function ─────────────
 def main():
-    fabric = Fabric(accelerator="cuda", devices=[4,5], strategy="ddp", precision="16-mixed")
+    fabric = Fabric(accelerator="cuda", devices=4, strategy="ddp", precision="16-mixed")
     fabric.launch()
     seed_everything(42)
 
@@ -84,6 +83,7 @@ def main():
         tt.ToTensor(),
         tt.Normalize(*stats)
     ])
+    # data_dir = "/home/madhu/.local/TEMP_CODES_FINAL/Datasets"
     test_dataset = CIFAR100(data_dir, train=False, download=True, transform=test_transform)
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=4)
     test_loader = fabric.setup_dataloaders(test_loader)
@@ -95,7 +95,11 @@ def main():
         temp0=True, temp1=True, temp2=True, temp3=True,
         temp4=True, temp5=True, temp6=True, temp7=True, temp8=True
     ).to(fabric.device)
-
+    # model = ResNet9_100_temp1(
+    #     3, out=100, gamma=gamma,
+    #     temp0=True, temp1=True, temp2=True, temp3=True,
+    #     temp4=True, temp5=True, temp6=True, temp7=True, temp8=True
+    # ).to(fabric.device)
     model.load_state_dict(torch.load(args.checkpoint))
 
     # Apply quantization
