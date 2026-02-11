@@ -51,11 +51,11 @@ class TEMP_Network_hybrid_nobn(torch.nn.Module):
     def forward(self, inputs):
             inputs = inputs.flatten(start_dim=1)
             if(len(self.gamma) > 0):
-                out = F.relu(-10*self.fc1(inputs))
+                out = F.relu(10*self.fc1(inputs))
             else:
                 out = F.relu(self.fc1(inputs))
             if(len(self.gamma) > 1):
-                out = (-10*self.fc2(out))
+                out = (10*self.fc2(out))
             else:
                 out = self.fc2(out)
             return out

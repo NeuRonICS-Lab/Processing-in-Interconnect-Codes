@@ -9,7 +9,7 @@ layer_dir = os.path.join(current_dir, 'PI2_Layers')
 sys.path.append(layer_dir)
 print(layer_dir)
 from PI2_CONV_in import temp_conv_k_opt
-from PI2_FC_in import MPLayer_in_K
+from PI2_FC_in import MPLayer_in_K, MPLayer_in_K1
 
 
 def conv_block(in_channels, out_channels, pool=False):
@@ -166,11 +166,6 @@ class ResNet9_100(nn.Module):
            out = self.classifier(out) 
         return out   
 
-def conv_block_Kr2(out_channels, pool=False):
-    layers = [nn.BatchNorm2d(out_channels),
-              nn.ReLU(inplace=True)]
-    if pool: layers.append(nn.MaxPool2d(2))
-    return nn.Sequential(*layers)
 
 class ResNet9_100_temp1(nn.Module):
     def __init__(self, in_channels, out=100,gamma=0,temp0 = False, temp1=False,temp2=False,temp3=False,temp4=False,temp5=False,temp6=False,temp7=False,temp8=False,sparse=False,drop=1):
@@ -242,9 +237,15 @@ class ResNet9_100_temp1(nn.Module):
             self.res222 = conv_block(128*4, 128*4)
       
         if(temp8):
-            self.classifier = nn.Sequential(nn.MaxPool2d(4), 
-                                        nn.Flatten(), 
-                                        MPLayer_in_K(128*4, out,gamma = gamma[8],diff=0,sparse=sparse,drop_prob = drop))
+            if(out==10):
+                self.classifier = nn.Sequential(nn.MaxPool2d(4), 
+                                            nn.Flatten(), 
+                                            MPLayer_in_K(128*4, out,gamma = gamma[8],diff=0,sparse=sparse,drop_prob = drop))
+            else:
+                self.classifier = nn.Sequential(nn.MaxPool2d(4), 
+                                            nn.Flatten(), 
+                                            MPLayer_in_K1(128*4, out,gamma = gamma[8],diff=0,sparse=sparse,drop_prob = drop))
+        
         else:
             print("9")
             self.classifier = nn.Sequential(nn.MaxPool2d(4), 
@@ -257,56 +258,56 @@ class ResNet9_100_temp1(nn.Module):
     def forward(self, xb):
         
         if(self.temp0):
-            out = -1*self.c1(xb)
+            out = 1*self.c1(xb)
             out = self.conv1(out)
         else:
             out = self.conv1(xb)
 
         if(self.temp1):
-            out= -1*self.c2(out) #64*9 = 576
+            out= 1*self.c2(out) #64*9 = 576
             out = self.conv2(out)
         else:
             out = self.conv2(out)
             
         if(self.temp2):
-            out1 = -1*self.res11(out)
+            out1 = 1*self.res11(out)
             out1 = self.res12(out1)
         else:
             out1 = self.res11(out)
         
         if(self.temp3):
-            out1 = -1*self.res21(out1)
+            out1 = 1*self.res21(out1)
             out = self.res22(out1) + out
         else:
             out = self.res22(out1) + out
                 
         # out = self.d(out)
         if(self.temp4):
-            out = -1*self.c3(out) #64*9 = 576
+            out = 1*self.c3(out) #64*9 = 576
             out = self.conv3(out)
         else:
             out = self.conv3(out)
         
         if(self.temp5):
-            out = -1*self.c4(out) #64*9 = 576
+            out = 1*self.c4(out) #64*9 = 576
             out = self.conv4(out)
         else:
             out = self.conv4(out)
             
         if(self.temp6):
-            out1 = -1*self.res211(out)
+            out1 = 1*self.res211(out)
             out1 = self.res212(out1)
         else:
             out1 = self.res211(out)
         
         if(self.temp7):
-            out1 = -1*self.res221(out1)
+            out1 = 1*self.res221(out1)
             out = self.res222(out1) + out
         else:
             out = self.res222(out1) + out
             
         if(self.temp8):
-            out = -10*self.classifier(out)
+            out = 10*self.classifier(out)
         else:
            out = self.classifier(out) 
         return out   
@@ -342,54 +343,56 @@ class ResNet9_100_temp_noise(nn.Module):
         self.res212 = conv_block_Kr2(128*4)
         self.res221 = temp_conv_k_opt(128*4, 128*4,kernel_size=3,gamma=gamma[7],diff=0,sparse=sparse,drop_prob=drop)
         self.res222 = conv_block_Kr2(128*4)
-        self.classifier = nn.Sequential(nn.MaxPool2d(4), 
+        if(out==10):
+            self.classifier = nn.Sequential(nn.MaxPool2d(4), 
                                         nn.Flatten(), 
                                         MPLayer_in_K(128*4, out,gamma = gamma[8],diff=0,sparse=sparse,drop_prob=drop))
-
-        
+        else:
+            self.classifier = nn.Sequential(nn.MaxPool2d(4), 
+                                        nn.Flatten(), 
+                                        MPLayer_in_K1(128*4, out,gamma = gamma[8],diff=0,sparse=sparse,drop_prob=drop))
     def forward(self, xb):
-            out = -1*self.c1(xb)
+            out = 1*self.c1(xb)
             noise1 = torch.randn_like(out) * self.std
             out = out + noise1
             out = self.conv1(out)
             
-            out= -1*self.c2(out) #64*9 = 576
+            out= 1*self.c2(out) #64*9 = 576
             noise2 = torch.randn_like(out) * self.std
             out = out + noise2
             out = self.conv2(out)
       
-            out1 = -1*self.res11(out)
-            noise1 = torch.randn_like(out) * self.std
-            out = out + noise1
+            out1 = 1*self.res11(out)
+            noise1 = torch.randn_like(out1) * self.std
+            out1 = out1 + noise1
             out1 = self.res12(out1)
 
-            out1 = -1*self.res21(out1)
-            noise1 = torch.randn_like(out) * self.std
-            out = out + noise1
+            out1 = 1*self.res21(out1)
+            noise1 = torch.randn_like(out1) * self.std
+            out1 = out1 + noise1
             out = self.res22(out1) + out
             
-            out = -1*self.c3(out) #64*9 = 576
+            out = 1*self.c3(out) #64*9 = 576
             noise1 = torch.randn_like(out) * self.std
             out = out + noise1
             out = self.conv3(out)
 
-        
-            out = -1*self.c4(out) #64*9 = 576
+            out = 1*self.c4(out) #64*9 = 576
             noise1 = torch.randn_like(out) * self.std
             out = out + noise1
             out = self.conv4(out)
 
-            out1 = -1*self.res211(out)
-            noise1 = torch.randn_like(out) * self.std
-            out = out + noise1
+            out1 = 1*self.res211(out)
+            noise1 = torch.randn_like(out1) * self.std
+            out1 = out1 + noise1
             out1 = self.res212(out1)
 
-            out1 = -1*self.res221(out1)
-            noise1 = torch.randn_like(out) * self.std
-            out = out + noise1
+            out1 = 1*self.res221(out1)
+            noise1 = torch.randn_like(out1) * self.std
+            out1 = out1 + noise1
             out = self.res222(out1) + out
             
-            out = -10*self.classifier(out)
+            out = 10*self.classifier(out)
             noise1 = torch.randn_like(out) * self.std
             out = out + noise1
             return out   

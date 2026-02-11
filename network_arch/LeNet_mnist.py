@@ -77,13 +77,13 @@ class LeNet5_K(nn.Module):
 
     def forward(self, x):
         if(self.temp1):
-            x = F.relu(-1*self.conv1(x)) #25*1
+            x = F.relu(1*self.conv1(x)) #25*1
         else:
             x = F.relu(self.conv1(x)) #25*1
         x = self.pool(x)
         
         if(self.temp2):
-            x = F.relu(-10*self.conv2(x)) #25*1
+            x = F.relu(10*self.conv2(x)) #25*1
         else:
             x = F.relu(self.conv2(x))
         x = self.pool(x)
@@ -91,17 +91,17 @@ class LeNet5_K(nn.Module):
         x = x.reshape(x.size(0), -1)
         
         if(self.temp3):
-            x = F.relu(-10*self.fc1(x))
+            x = F.relu(10*self.fc1(x))
         else:
             x = F.relu(self.fc1(x))
             
         if(self.temp4):
-            x = F.relu(-10*self.fc2(x))
+            x = F.relu(10*self.fc2(x))
         else:
             x = F.relu(self.fc2(x))
         x = self.dropout(x)
         if(self.temp5):
-            x = F.relu(-10*self.fc3(x))
+            x = F.relu(10*self.fc3(x))
         else:
             x = self.fc3(x)
         return x
