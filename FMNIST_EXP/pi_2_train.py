@@ -102,6 +102,7 @@ def main():
     # Dataset & transforms
     transform = tt.ToTensor()
     data_dir = os.path.join(current_dir, "Datasets")
+    # data_dir = "/home/Madhu/TEMP_FINAL_CODES/Datasets"
     fmnist_train = FashionMNIST(data_dir, train=True, download=True, transform=transform)
     fmnist_test = FashionMNIST(data_dir, train=False, download=True, transform=transform)
 

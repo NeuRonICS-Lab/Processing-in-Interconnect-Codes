@@ -62,7 +62,7 @@ def main():
     # ───── Data loading & transformation ─────
     transform = transforms.ToTensor()
     dataset_path = os.path.join(current_dir, 'Datasets')
-
+    # dataset_path = "/home/Madhu/TEMP_FINAL_CODES/Datasets"
     # Load FashionMNIST
     full_train = FashionMNIST(dataset_path, train=True, download=True, transform=transform)
     test_data = FashionMNIST(dataset_path, train=False, download=True, transform=transform)
