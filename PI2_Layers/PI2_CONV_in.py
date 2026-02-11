@@ -9,6 +9,7 @@ def drop_random_elements(tensor, drop_prob=0.3):
     mask = torch.rand(tensor.shape) > drop_prob  # Create a random mask
     return tensor[mask]
 
+#pi^2 - conv layer
 class K_layer_opt(nn.Module):
     def __init__(self, input_dim, output_dim, gamma, diff,sparse,drop_prob=0.3):
         super().__init__()
@@ -19,7 +20,7 @@ class K_layer_opt(nn.Module):
         # torch.manual_seed(45)
         self.weight = torch.nn.Parameter(torch.empty(input_dim, output_dim), requires_grad=True)
         torch.nn.init.xavier_normal_(self.weight, gain=1.0)
-        self.weight.data = torch.clamp(self.weight.data, -3, 3)  # In-place clamping of weight values    
+        # self.weight.data = torch.clamp(self.weight.data, -3, 3)  # In-place clamping of weight values    
     
     def spikeK(self, sorted_in: torch.Tensor, gamma: float):
       if gamma == 0 or gamma == 1:
@@ -97,7 +98,137 @@ class temp_conv_k_opt(nn.Module):
         output_n = torch.reshape(output_n, (inp_size[0], out_height, out_width, self.out_channels))
         output_n = output_n.permute(0, 3, 1, 2)
         if(self.diff==0):    ##changes made here
-          return output_p - output_n
+          return output_n - output_p
         else:
-          return output_p, output_n 
+          return output_p, output_n
+         
+#pi^2_s conv layer with < 1 sparsity   
+class K_layer_opt1s(torch.nn.Module):
+    def __init__(self, input_dim, output_dim, k_in, k_act, diff):
+        super().__init__()
+        self.k_in = k_in
+        self.k_act = k_act
+        self.diff = diff
+        torch.manual_seed(45)
+        self.weight = torch.nn.Parameter(torch.empty(input_dim, output_dim), requires_grad=True)
+        torch.nn.init.xavier_normal_(self.weight, gain=1.0)
+        # self.weight.data = torch.clamp(self.weight.data, -3, 3)  # In-place clamping of weight values
+
+    def spikeK(self, sorted_in: torch.Tensor):
+      return (sorted_in.sum(dim=2)/(self.k_act)) #avg of min K values
+
+    def spikeK1(self, sorted_in: torch.Tensor):
+      thr,_ = torch.topk(sorted_in, self.k_act, dim=2, largest=False, sorted=False)
+      sum_nonzero = thr.sum(dim=2)
+      return (sum_nonzero/(self.k_act)) #avg of min K values
+
+    def forward(self, input, inputn=None):
+        input = torch.unsqueeze(input,axis=-1)
+        inputn = F.relu((3-input))
+        Wp = F.relu(3+self.weight)
+        Wn = F.relu(3-self.weight)
+        s = inputn.size()[2]
+        inn,innq = torch.topk(inputn,int(s*self.k_in),dim=2, largest=False, sorted=False)
+        innq = innq.squeeze(-1)
+        zPlus = self.spikeK1(inn + Wn[innq,:])
+        zMinus = self.spikeK1(inn + Wp[innq,:])
+        return zPlus, zMinus
+ 
+class temp_conv_k_opt1s(torch.nn.Module):
+    def __init__(self, in_channels, out_channels, k_in, k_act, kernel_size=3, dilation=1, padding=1, stride=1, diff=0):
+        super(temp_conv_k_opt1s, self).__init__()
+        self.kernel_size = kernel_size
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.dilation = (dilation, dilation)
+        self.padding = padding
+        self.stride = stride
+        self.k_in = k_in
+        self.k_act = k_act
+        self.diff = diff
+        self.cnn = K_layer_opt1s(self.in_channels * self.kernel_size * self.kernel_size, self.out_channels, self.k_in, self.k_act, diff=self.diff)
+ 
+    def forward(self, inputs,inputn=None):
+        inp_size = inputs.size()
+        inp_unf_p = F.unfold(inputs, (self.kernel_size, self.kernel_size), stride=self.stride, padding=self.padding)
+        patches = inp_unf_p.permute(0, 2, 1)  # Shape: [batch_size, num_patches, patch_size]
+        if(inputn is not None):
+          inp_unf_n = F.unfold(inputn, (self.kernel_size, self.kernel_size), stride=self.stride, padding=self.padding)
+          patches_n = inp_unf_n.permute(0, 2, 1)  # Shape: [batch_size, num_patches, patch_size]
+          output_p, output_n = self.cnn(patches,patches_n)
+        else:
+          output_p, output_n = self.cnn(patches)
+        out_height = math.floor((inp_size[2] - self.kernel_size + 2 * self.padding) / self.stride) + 1 #compute new output height
+        out_width = math.floor((inp_size[3] - self.kernel_size + 2 * self.padding) / self.stride) + 1 #compute new output width
+        output_p = torch.reshape(output_p, (inp_size[0], out_height, out_width, self.out_channels))
+        output_p = output_p.permute(0, 3, 1, 2)
+        output_n = torch.reshape(output_n, (inp_size[0], out_height, out_width, self.out_channels))
+        output_n = output_n.permute(0, 3, 1, 2)
+        if(self.diff==0):    ##changes made here
+          return output_n - output_p
+        else:
+          return output_p, output_n
+
+#pi^2_s layer with sparsity = 1
+class K_layer_opt1single(torch.nn.Module):
+    def __init__(self, input_dim, output_dim, k_act, k_in=0, diff=0):
+        super().__init__()
+        self.k_in = k_in
+        self.k_act = k_act
+        self.diff = diff
+        torch.manual_seed(45)
+        self.weight = torch.nn.Parameter(torch.empty(input_dim, output_dim), requires_grad=True)
+        torch.nn.init.xavier_normal_(self.weight, gain=1.0)
+        # self.weight.data = torch.clamp(self.weight.data, -3, 3)  # In-place clamping of weight values
+
+    def spikeK(self, sorted_in: torch.Tensor):
+      return (sorted_in.sum(dim=2)/(self.k_act)) #avg of min K values
     
+    def spikeK1(self, sorted_in: torch.Tensor):
+      thr,_ = torch.topk(sorted_in, self.k_act, dim=2, largest=False, sorted=False)
+      sum_nonzero = thr.sum(dim=2)
+      return (sum_nonzero/(self.k_act)) #avg of min K values
+    
+    def forward(self, input, inputn=None):
+        input = torch.unsqueeze(input,axis=-1)
+        input = F.relu((3-input))
+        Wp = F.relu(3+self.weight)
+        Wn = F.relu(3-self.weight)
+        zPlus = self.spikeK1(input + Wn)
+        zMinus = self.spikeK1(input + Wp)
+        return zPlus, zMinus
+ 
+class temp_conv_k_opt1single(torch.nn.Module):
+    def __init__(self, in_channels, out_channels, k_act, k_in=0, kernel_size=3, dilation=1, padding=0, stride=1, diff=0):
+        super(temp_conv_k_opt1single, self).__init__()
+        self.kernel_size = kernel_size
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.dilation = (dilation, dilation)
+        self.padding = padding
+        self.stride = stride
+        self.k_in = k_in
+        self.k_act = k_act
+        self.diff = diff
+        self.cnn = K_layer_opt1single(self.in_channels * self.kernel_size * self.kernel_size, self.out_channels, self.k_act, self.k_in, diff=self.diff)
+ 
+    def forward(self, inputs,inputn=None):
+        inp_size = inputs.size()
+        inp_unf_p = F.unfold(inputs, (self.kernel_size, self.kernel_size), stride=self.stride, padding=self.padding)
+        patches = inp_unf_p.permute(0, 2, 1)  # Shape: [batch_size, num_patches, patch_size]
+        if(inputn is not None):
+          inp_unf_n = F.unfold(inputn, (self.kernel_size, self.kernel_size), stride=self.stride, padding=self.padding)
+          patches_n = inp_unf_n.permute(0, 2, 1)  # Shape: [batch_size, num_patches, patch_size]
+          output_p, output_n = self.cnn(patches,patches_n)
+        else:
+          output_p, output_n = self.cnn(patches)
+        out_height = math.floor((inp_size[2] - self.kernel_size + 2 * self.padding) / self.stride) + 1 #compute new output height
+        out_width = math.floor((inp_size[3] - self.kernel_size + 2 * self.padding) / self.stride) + 1 #compute new output width
+        output_p = torch.reshape(output_p, (inp_size[0], out_height, out_width, self.out_channels))
+        output_p = output_p.permute(0, 3, 1, 2)
+        output_n = torch.reshape(output_n, (inp_size[0], out_height, out_width, self.out_channels))
+        output_n = output_n.permute(0, 3, 1, 2)
+        if(self.diff==0):    ##changes made here
+          return output_n - output_p
+        else:
+          return output_p, output_n
