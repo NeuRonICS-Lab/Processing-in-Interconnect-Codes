@@ -25,12 +25,23 @@ This repo contains the following directories
 Processing-in-Interconnect-Codes/
 │
 ├── PI2_Layers/           # TEMP / π² custom PyTorch layers (Conv, FC, MLP blocks)
+
 ├── network_arch/         # Network definitions (ResNet9, LeNet, TEMP-MLP, etc.)
+
 ├── MNIST_EXP/            # Training/eval scripts for MNIST experiments
+
 ├── FMNIST_EXP/           # Training/eval scripts for Fashion-MNIST experiments
+
 ├── CIFAR10_EXP/          # Training/eval scripts for CIFAR10 experiments
+
 ├── CIFAR100_EXP/         # Training/eval scripts for CIFAR100 experiment
+
+├── CIFAR100_EXP_sparse/  # Training/eval scripts for CIFAR100 pi2_sparse experiments
+
+├── CIFAR10_EXP_sparse/         # Training/eval scripts for CIFAR10 pi2_sparse experiment
+
 ├── Trained_models/       # Pretrained checkpoints (saved after training)
+
 └── README.md             # (this file)
 
 
