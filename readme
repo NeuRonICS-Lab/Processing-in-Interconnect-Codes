@@ -30,6 +30,7 @@ Processing-in-Interconnect-Codes/
 ├── CIFAR10_EXP/          # Training/eval scripts for CIFAR10 experiments
 ├── CIFAR100_EXP/         # Training/eval scripts for CIFAR100 experiment
 ├── Trained_models/       # Pretrained checkpoints (saved after training)
+├── OMNET/                # OMNET codes to implement the neuron and synapse model using the traffic shaping protocols
 └── README.md             # (this file)
 
 
