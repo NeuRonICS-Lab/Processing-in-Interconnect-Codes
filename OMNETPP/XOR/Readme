@@ -1,1 +1,98 @@
+Overview
+This repository implements a 2-input, 10-hidden, 2-output XOR classifier using the π² (Processing-in-Interconnect) based traffic shaping protocols,
+simulated in OMNeT++/INET. The neural network computation is carried out entirely by TSN traffic-shaping primitives: synapse is encoded via ATS (EligibilityTimeMeter),
+synaptic weights are encoded as IEEE 802.1Q PCP priority values, and the neuron is implemented via CBS (CreditBasedGate). 
+Network: TEMP_Case_2x10x2_xor_final (defined in the NED file). Three input configurations are provided ([General], [input_2], [input_3]), 
+corresponding to the three non-trivial XOR input cases.
 
+# README — π² XOR Network (OMNeT++)
+
+Oct 10, 2026 · @madhu
+
+## Overview
+
+This repository implements a **2-input, 10-hidden, 2-output XOR classifier** using the **π² (Processing-in-Interconnect) mesh** architecture, simulated in OMNeT++/INET. The neural network computation is carried out entirely by TSN traffic-shaping primitives: neuron timing is encoded via ATS (`EligibilityTimeMeter`), synaptic weights are encoded as IEEE 802.1Q PCP priority values, and the ReLU activation is implemented via CBS (`CreditBasedGate`). No dedicated compute hardware is used — inference runs in the interconnect itself.
+
+Network: `TEMP_Case_2x10x2_xor_final` (defined in the NED file). Three input configurations are provided (`[General]`, `[input_2]`, `[input_3]`), corresponding to the three non-trivial XOR input cases.
+
+## Network Architecture
+
+The NED topology (`TEMP_Case_2x10x2_xor_final`) follows this datapath:
+
+```
+inn[0..1]  →  ATS1  →  CBS1  →  hidd[0..9]  →  ATS2  →  CBS2  →  outt[0..1]  →  tx  →  actuator
+```
+
+| Node | Type | Role |
+| --- | --- | --- |
+| `inn[0..1]` | `TsnDevice` | Input nodes — fire spike packets encoding x⁺ and x⁻ for each input |
+| `ATS1` | `TsnSwitch` | Layer-1 ATS switch — encodes weighted input spike times via `maxResidenceTime` (8 streams, PCP 0–7) |
+| `CBS1` | `TsnSwitch` | Layer-1 CBS switch — implements ReLU activation for hidden layer |
+| `hidd[0..9]` | `TsnDevice` | Hidden neurons — receive weighted spikes, multicast outputs to both output nodes |
+| `ATS2` | `TsnSwitch` | Layer-2 ATS switch — encodes weighted hidden spike times |
+| `CBS2` | `TsnSwitch` | Layer-2 CBS switch — implements ReLU for output layer |
+| `outt[0..1]` | `TsnDevice` | Output neurons — `class0` and `class1` |
+| `actuator` | `TsnDevice` | Final classifier — receives winning class packet |
+
+Each input node sends **4 packet streams per hidden node** (40 apps total): `xp1`, `xp2` (positive spike), `xm1`, `xm2` (negative spike). Weights are encoded as PCP values in `omnetpp_w1_1.ini` (inn\[0\] → hidden), `omnetpp_w11_1.ini` (inn\[1\] → hidden), and `omnetpp_w2_1.ini` (hidden → output). Spike timing (the neuron's membrane potential) is encoded in `omnetpp_input_1.ini` as `initialProductionOffset` values per stream.
+
+## Repository Structure
+
+| File | Description |
+| --- | --- |
+| `TEMP_Case_2x10x2_xor_final.ned` | Network topology — 2 inputs, 10 hidden, 2 outputs, ATS+CBS switches |
+| `omnetpp.ini` | Main simulation config — includes all sub-ini files, ATS/CBS params, stream mappings |
+| `omnetpp_input_1.ini` | Input spike timing for XOR case 1 (`initialProductionOffset` per app) |
+| `omnetpp_input_2.ini` | Input spike timing for XOR case 2 |
+| `omnetpp_input_3.ini` | Input spike timing for XOR case 3 |
+| `omnetpp_w1_1.ini` | Weight PCP mapping: `inn[0]` → hidden layer (input 1 weights) |
+| `omnetpp_w11_1.ini` | Weight PCP mapping: `inn[1]` → hidden layer (input 2 weights) |
+| `omnetpp_w2_1.ini` | Weight PCP mapping: `hidd[0..9]` → output layer |
+| `EligibilityTimeMeter.cc` | Modified ATS meter implementing π² neuron timing (see ATS README) |
+| `CreditBasedGate.cc` | Modified CBS gate implementing π² ReLU activation (see CBS README) |
+
+## Prerequisites
+
+- **OMNeT++ 6.x** — [download](https://omnetpp.org/download/)
+- **INET Framework 4.5+** with TSN support
+- Modified `EligibilityTimeMeter.cc` placed in `<INET_ROOT>/src/inet/protocolelement/shaper/`
+- Modified `CreditBasedGate.cc` placed in `<INET_ROOT>/src/inet/queueing/gate/`
+- Rebuild INET after copying both files.
+
+## Running the Simulation
+
+Three XOR input cases are provided as named configurations:
+
+| Configuration | Description |
+| --- | --- |
+| `[General]` | XOR input case 1 (includes `omnetpp_input_1.ini`) |
+| `[input_2]` | XOR input case 2 (includes `omnetpp_input_2.ini`) |
+| `[input_3]` | XOR input case 3 (includes `omnetpp_input_3.ini`) |
+
+Run from the OMNeT++ IDE: open `omnetpp.ini`, select the configuration, and click **Run**. Or from the command line:
+
+```
+opp_run -m -u Cmdenv -c General omnetpp.ini
+opp_run -m -u Cmdenv -c input_2 omnetpp.ini
+opp_run -m -u Cmdenv -c input_3 omnetpp.ini
+```
+
+Sim time limit is **35s**; resolution **0.1ms**. The winning output class arrives at `actuator` as a packet named `class0` or `class1`.
+
+## Weight Encoding via PCP
+
+Synaptic weights are encoded as IEEE 802.1Q **PCP (Priority Code Point)** values in the stream-coder encoder mappings. Each stream name encodes the sign of both the pre-synaptic spike and the weight:
+
+| Stream prefix | Meaning |
+| --- | --- |
+| `hp` / `xp` | Positive pre-synaptic spike (x⁺ or h⁺) |
+| `hm` / `xm` | Negative pre-synaptic spike (x⁻ or h⁻) |
+| `wp` / `wm` (suffix) | Positive or negative weight |
+
+The **PCP value** encodes the weight magnitude as a delay class (0–7) fed into the ATS `maxResidenceTime` ladder. A PCP of 0 maps to `maxResidenceTime = 0s` (no delay); higher PCP values map to longer residence times, implementing larger synaptic weights as longer eligibility delays.
+
+The three weight files cover:
+
+- **`omnetpp_w1_1.ini`** — `inn[0]` → `hidd[*]` (weights from input 1 to all hidden nodes)
+- **`omnetpp_w11_1.ini`** — `inn[1]` → `hidd[*]` (weights from input 2 to all hidden nodes)
+- **`omnetpp_w2_1.ini`** — `hidd[*]` → `outt[*]` (weights from each hidden node to both output nodes)
