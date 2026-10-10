@@ -42,6 +42,8 @@ Processing-in-Interconnect-Codes/
 
 ├── Trained_models/       # Pretrained checkpoints (saved after training)
 
+├── OMNET/            # OMNET related code to map the neuron and synapse models to traffic chapsing protocols
+
 └── README.md             # (this file)
 
 
