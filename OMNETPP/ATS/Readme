@@ -1,1 +1,15 @@
+This repository contains changes to the INET EligibilityTimeMeter source file to implement a π² (Processing-in-Interconnect) synapse mapped 
+onto the IEEE 802.1Qcr Asynchronous Traffic Shaper (ATS) protocol, simulated in OMNeT++/INET over a TsnLinearNetwork. 
+The omnetpp.ini file tests the π² synapse mapped to ATS with two traffic classes (Best Effort and Video) metered at the switch ingress 
+via EligibilityTimeMeter and shaped at egress via Ieee8021qAsynchronousShaper.
 
+Running the Simulation
+1. Copy EligibilityTimeMeter.cc into <INET_ROOT>/src/inet/protocolelement/shaper/ and rebuild INET.
+2. Place omnetpp.ini in your project directory.
+3. Run the simulation
+
+The change to EligibilityTimeMeter.cc is as follows:
+Change 1 — meterPacket(): The standard ATS eligibility time computation:
+eligibilityTime = max(arrivalTime, groupEligibilityTime, schedulerEligibilityTime)
+is replaced with:
+eligibilityTime = arrivalTime + maxResidenceTime   // T1
