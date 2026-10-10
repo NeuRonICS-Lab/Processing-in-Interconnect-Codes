@@ -20,7 +20,7 @@ corresponding to the three non-trivial XOR input cases.
 | `omnetpp_w2_1.ini` | Weight PCP mapping: `hidd[0..9]` → output layer |
 | `EligibilityTimeMeter.cc` | Modified ATS meter implementing π² neuron timing (see ATS README) |
 | `CreditBasedGate.cc` | Modified CBS gate implementing π² ReLU activation (see CBS README) |
-
+| The jupyter notebook| implements the training, quantized inference of pi2-NN on the XOR dataset, which is then mapped and compared with the omnett results.
 
 ## Running the Simulation
 
