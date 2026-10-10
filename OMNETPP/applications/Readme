@@ -1,0 +1,2 @@
+These files implement the hidden and output layer activations and packet generation functions.
+They have to be added to /inet4.5/src/inet/applications/udpapp folder
