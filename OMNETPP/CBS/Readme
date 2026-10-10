@@ -1,1 +1,14 @@
-This folder contains the changes to be made to the Credit based shaper source file to implement pi2 neuron
+This folder contains changes to the INET CreditBasedGate source file to implement a π² (Processing-in-Interconnect) neuron 
+mapped onto the IEEE 802.1Qav Credit-Based Shaper (CBS) protocol, simulated in OMNeT++/INET over a TsnLinearNetwork. 
+The omnetpp2.ini file tests the π² neuron mapped to the CBS protocol.
+
+Changes implemented:
+1. In the CreditBasedGate.cc file the following subsection of the code is changed. 
+handleCanPullPacketChanged(): When a new packet enters the transmission selection queue, 
+the idleCreditGainRate is incremented by 1 and EV_INFO reports the updated rate and current credit (qqqqppacket enters the Q).
+2. The omnetpp2.ini file - tests the pi2 neuron mapped to the CBS protocol.
+
+Running the Simulation
+1. Copy CreditBasedGate.cc into <INET_ROOT>/src/inet/queueing/gate/ and rebuild INET.
+2. Place omnetpp.ini in your project directory
+3. Run the simulation
