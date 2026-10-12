@@ -8,8 +8,8 @@ Running the Simulation
 2. Place omnetpp.ini in your project directory.
 3. Run the simulation
 
-The change to EligibilityTimeMeter.cc is as follows:
-Change 1 — meterPacket(): The standard ATS eligibility time computation:
+The change to EligibilityTimeMeter.cc to incorporate the synapse is as follows:
+Change 1 — meterPacket() section of the code: The standard ATS eligibility time computation:
 eligibilityTime = max(arrivalTime, groupEligibilityTime, schedulerEligibilityTime)
 is replaced with:
 eligibilityTime = arrivalTime + maxResidenceTime   // T1
