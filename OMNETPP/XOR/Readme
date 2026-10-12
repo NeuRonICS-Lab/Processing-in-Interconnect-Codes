@@ -3,7 +3,7 @@ This repository implements a 2-input, 10-hidden, 2-output XOR classifier using t
 simulated in OMNeT++/INET. The neural network computation is carried out entirely by TSN traffic-shaping primitives: synapse is encoded via ATS (EligibilityTimeMeter),
 synaptic weights are encoded as IEEE 802.1Q PCP priority values, and the neuron is implemented via CBS (CreditBasedGate). 
 Network: TEMP_Case_2x10x2_xor_final (defined in the NED file). Three input configurations are provided ([General], [input_2], [input_3]), 
-corresponding to the three non-trivial XOR input cases.
+corresponding to the three XOR input cases.
 
 
 ## Repository Structure
