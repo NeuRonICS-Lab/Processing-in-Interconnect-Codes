@@ -114,7 +114,7 @@ void CreditBasedGate::processPacket(Packet *packet)
 {
     PacketGateBase::processPacket(packet);
     packet->addTag<CreditGateTag>()->setId(getId());
-    //change 1
+    //info
     EV_INFO << "PPPPPKT LEAVES" << simTime() << "credit is " << currentCredit << std::endl;
 }
 
@@ -265,13 +265,19 @@ void CreditBasedGate::handleCanPullPacketChanged(cGate *gate)
     scheduleChangeTimer();
     PacketGateBase::handleCanPullPacketChanged(gate);
 
-    //change 2
+    //change 1
     EV_INFO <<"qqqqppacket enters the Q" << "time"  << simTime() << std::endl ; //the num of packets that actually enetr the transmission selection algorithm ( packet gate)
-    idleCreditGainRate += 1;
-    EV_INFO << "ppppppppSetting currentCredit gain rate to " << idleCreditGainRate << "current credit is: " << currentCredit << std::endl;
+    auto upstreamModule = inputGate->getPathStartGate()->getOwnerModule();
+    auto queueCollection = check_and_cast<inet::queueing::IPacketCollection *>(upstreamModule);
+    int len = queueCollection->getNumPackets();
+    // EV_INFO << "Upstream module is: "
+    //  << inputGate->getPathStartGate()->getOwnerModule()->getFullPath() << "queue length is: "
+    //         << len
+    // << endl;
+    idleCreditGainRate = len;
     updateCurrentCreditGainRate();
-       // 4. reschedule the threshold-crossing timer against the new slope
     scheduleChangeTimer();
+    EV_INFO << "Setting currentCredit gain rate to " << idleCreditGainRate << "current credit is: " << currentCredit << std::endl;
 }
 
 std::string CreditBasedGate::resolveDirective(char directive) const
@@ -289,4 +295,3 @@ std::string CreditBasedGate::resolveDirective(char directive) const
 
 } // namespace queueing
 } // namespace inet
-
