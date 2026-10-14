@@ -25,8 +25,6 @@ class INET_API UdpSink_temp_multicast : public ApplicationBase, public UdpSocket
     inet::MacAddress macAddressCopy;
     int numEchoed; // just for WATCH
     int tout = 0;
-    int out_nodes;
-    int tneg;
     simtime_t tminus; // just for WATCH
     simtime_t tplus; // just for WATCH
     simtime_t Tminus; // just for WATCH
