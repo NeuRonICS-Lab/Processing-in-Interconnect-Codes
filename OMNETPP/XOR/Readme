@@ -1,41 +1,129 @@
-Overview
-This repository implements a 2-input, 10-hidden, 2-output XOR classifier using the π² (Processing-in-Interconnect) based traffic shaping protocols,
-simulated in OMNeT++/INET. The neural network computation is carried out entirely by TSN traffic-shaping primitives: synapse is encoded via ATS (EligibilityTimeMeter),
-synaptic weights are encoded as IEEE 802.1Q PCP priority values, and the neuron is implemented via CBS (CreditBasedGate). 
-Network: TEMP_Case_2x10x2_xor_final (defined in the NED file). Three input configurations are provided ([General], [input_2], [input_3]), 
-corresponding to the three XOR input cases.
+# π²-Based XOR Classifier Using OMNeT++/INET
 
+## Overview
+
+This repository implements a **2-input, 10-hidden, 2-output XOR classifier** using the π² (Processing-in-Interconnect) computing paradigm. The network is simulated in **OMNeT++/INET**, where neural network computation is performed entirely using Time-Sensitive Networking (TSN) traffic-shaping primitives.
+
+The implementation maps neural network operations to TSN mechanisms as follows:
+
+- **Synapses:** Implemented using Asynchronous Traffic Shaping (ATS) through `EligibilityTimeMeter`, which encodes synaptic delays.
+- **Synaptic weights:** Encoded using IEEE 802.1Q Priority Code Point (PCP) values.
+- **Neurons:** Implemented using Credit-Based Shaping (CBS) through `CreditBasedGate`, which models the π² neuron activation function.
+
+The network topology, defined in `TEMP_Case_2x10x2_xor_final.ned`, consists of two input neurons, ten hidden neurons, and two output neurons.
+
+Three simulation configurations are provided — `[General]`, `[input_2]`, and `[input_3]` — corresponding to the three XOR input cases.
+
+The repository also includes a Jupyter notebook that implements training and quantized inference of the π² neural network on the XOR dataset. The trained network is mapped to the OMNeT++ simulation, and the results are compared to validate the implementation.
 
 ## Repository Structure
 
 | File | Description |
-| --- | --- |
-| `TEMP_Case_2x10x2_xor_final.ned` | Network topology — 2 inputs, 10 hidden, 2 outputs, ATS+CBS switches |
-| `omnetpp.ini` | Main simulation config — includes all sub-ini files, ATS/CBS params, stream mappings |
-| `omnetpp_input_1.ini` | Input spike timing for XOR case 1 (`initialProductionOffset` per app) |
-| `omnetpp_input_2.ini` | Input spike timing for XOR case 2 |
-| `omnetpp_input_3.ini` | Input spike timing for XOR case 3 |
-| `omnetpp_w1_1.ini` | Weight PCP mapping: `inn[0]` → hidden layer (input 1 weights) |
-| `omnetpp_w11_1.ini` | Weight PCP mapping: `inn[1]` → hidden layer (input 2 weights) |
-| `omnetpp_w2_1.ini` | Weight PCP mapping: `hidd[0..9]` → output layer |
-| `EligibilityTimeMeter.cc` | Modified ATS meter implementing π² neuron timing (see ATS README) |
-| `CreditBasedGate.cc` | Modified CBS gate implementing π² ReLU activation (see CBS README) |
-| The jupyter notebook| implements the training, quantized inference of pi2-NN on the XOR dataset, which is then mapped and compared with the omnett results.
+|---|---|
+| `TEMP_Case_2x10x2_xor_final.ned` | Defines the network topology, including the input layer, hidden layer, output layer, and ATS/CBS switches. |
+| `omnetpp.ini` | Main simulation configuration, including sub-configuration files, ATS/CBS parameters, and stream mappings. |
+| `omnetpp_input_1.ini` | Defines input spike timings for XOR case 1 using `initialProductionOffset` for each application. |
+| `omnetpp_input_2.ini` | Defines input spike timings for XOR case 2. |
+| `omnetpp_input_3.ini` | Defines input spike timings for XOR case 3. |
+| `omnetpp_w1_1.ini` | Defines PCP weight mappings from `inn[0]` to the hidden layer. |
+| `omnetpp_w11_1.ini` | Defines PCP weight mappings from `inn[1]` to the hidden layer. |
+| `omnetpp_w2_1.ini` | Defines PCP weight mappings from the hidden layer to the output layer. |
+| `EligibilityTimeMeter.cc` | Modified ATS meter implementing π² neuron timing. See the ATS README for details. |
+| `CreditBasedGate.cc` | Modified CBS gate implementing the π² ReLU activation function. See the CBS README for details. |
+| Jupyter notebook | Implements training and quantized inference of the π² neural network on the XOR dataset, followed by mapping and comparison with OMNeT++ simulation results. |
+
+## Network Architecture
+
+The network implements a **2–10–2 neural network**:
+
+- **Input layer:** 2 neurons
+- **Hidden layer:** 10 neurons
+- **Output layer:** 2 neurons
+
+The computation is realized using ATS and CBS traffic-shaping mechanisms rather than conventional multiply–accumulate (MAC) operations.
+
+### Mapping of Neural Operations to TSN Primitives
+
+| Neural Network Operation | TSN Mechanism | Implementation |
+|---|---|---|
+| Synaptic delay | Asynchronous Traffic Shaping (ATS) | `EligibilityTimeMeter` |
+| Synaptic weight encoding | IEEE 802.1Q PCP | PCP priority values |
+| Neuron activation | Credit-Based Shaping (CBS) | `CreditBasedGate` |
+| Input spike generation | Application production offsets | `initialProductionOffset` |
 
 ## Running the Simulation
 
-Three XOR input cases are provided as named configurations:
+### Using the OMNeT++ IDE
+
+1. Open the project in the OMNeT++ IDE.
+2. Open `omnetpp.ini`.
+3. Select the desired simulation configuration.
+4. Click **Run** to execute the simulation.
+
+### Available Configurations
 
 | Configuration | Description |
-| --- | --- |
-| `[General]` | XOR input case 1 (includes `omnetpp_input_1.ini`) |
-| `[input_2]` | XOR input case 2 (includes `omnetpp_input_2.ini`) |
-| `[input_3]` | XOR input case 3 (includes `omnetpp_input_3.ini`) |
+|---|---|
+| `[General]` | Runs XOR input case 1 using `omnetpp_input_1.ini`. |
+| `[input_2]` | Runs XOR input case 2 using `omnetpp_input_2.ini`. |
+| `[input_3]` | Runs XOR input case 3 using `omnetpp_input_3.ini`. |
 
-Run from the OMNeT++ IDE: open `omnetpp.ini`, select the configuration, and click **Run**. Or from the command line:
+Each configuration specifies the input spike timings for the corresponding XOR case while using the network topology and synaptic weight mappings defined by the project configuration.
 
-The three synaptic weight files cover:
+### Using the Command Line
 
-- **`omnetpp_w1_1.ini`** — `inn[0]` → `hidd[*]` (weights from input 1 to all hidden nodes)
-- **`omnetpp_w11_1.ini`** — `inn[1]` → `hidd[*]` (weights from input 2 to all hidden nodes)
-- **`omnetpp_w2_1.ini`** — `hidd[*]` → `outt[*]` (weights from each hidden node to both output nodes)
+Run the simulation executable generated by your OMNeT++ build. The exact executable name and command depend on your project configuration and build environment.
+
+For example, if the generated executable is named `TEMP_Case_2x10x2_xor_final`, use:
+
+```bash
+./TEMP_Case_2x10x2_xor_final -u Cmdenv -c General
+```
+
+To run the other input configurations:
+
+```bash
+./TEMP_Case_2x10x2_xor_final -u Cmdenv -c input_2
+./TEMP_Case_2x10x2_xor_final -u Cmdenv -c input_3
+```
+
+Run these commands from the directory containing the generated executable. Adjust the executable name or path if your build configuration differs.
+
+## Synaptic Weight Configuration
+
+The synaptic weights are encoded using IEEE 802.1Q PCP values and specified through three configuration files.
+
+| Configuration File | Connection | Description |
+|---|---|---|
+| `omnetpp_w1_1.ini` | `inn[0]` → `hidd[*]` | Encodes weights from input neuron 1 to all hidden neurons. |
+| `omnetpp_w11_1.ini` | `inn[1]` → `hidd[*]` | Encodes weights from input neuron 2 to all hidden neurons. |
+| `omnetpp_w2_1.ini` | `hidd[*]` → `outt[*]` | Encodes weights from each hidden neuron to both output neurons. |
+
+These mappings establish the synaptic connections and their corresponding weight encodings in the simulated network.
+
+## Training and Quantized Inference
+
+The accompanying Jupyter notebook implements the software-side workflow for the XOR classifier:
+
+1. Train the π² neural network on the XOR dataset.
+2. Quantize the trained model for inference.
+3. Map the quantized network parameters to the OMNeT++/INET configuration.
+4. Simulate the network using the modified ATS and CBS implementations.
+5. Compare the software inference results with the OMNeT++ simulation results.
+
+This workflow provides a way to evaluate the correspondence between the trained π² neural network and its implementation using TSN traffic-shaping primitives.
+
+## Implementation Details
+
+The implementation relies on modified INET components:
+
+- **`EligibilityTimeMeter.cc`:** Extends ATS eligibility-time processing to implement π² timing operations.
+- **`CreditBasedGate.cc`:** Modifies CBS behavior to implement the π² ReLU activation function.
+
+Refer to the corresponding ATS and CBS README files for further details about these modifications.
+
+## Summary
+
+This repository demonstrates the implementation and simulation of a π²-based XOR classifier using OMNeT++/INET. By encoding synaptic weights as PCP priorities and implementing synaptic delays and neuron activation through ATS and CBS mechanisms, respectively, the approach explores how existing TSN traffic-shaping primitives can serve as computational elements in a neural network.
+
+The accompanying training notebook and simulation configurations support comparison between software-based quantized inference and the network simulation.
