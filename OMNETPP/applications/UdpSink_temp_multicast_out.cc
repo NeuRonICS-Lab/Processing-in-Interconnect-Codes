@@ -52,6 +52,8 @@ void UdpSink_temp_multicast_out::initialize(int stage)
        tplus = 10;
        Tminus = 10;
        Tplus = 10;
+       tout1 = 0;
+       tout2 = 0;
        tout = 0;
         WATCH(numEchoed);
         timerNext = new cMessage("temp_hid");
@@ -100,24 +102,34 @@ void UdpSink_temp_multicast_out::socketDataArrived(UdpSocket *socket, Packet *pk
         EV_INFO << "Packet name not found " << endl;
     }
     // Identify packet by name
-   EV_INFO << "Received packet: " << packetName << endl;
+   EV_INFO << "Received packet: " << packetName << "tout1 is: " << tout1 << endl;
 
    // Store arrival times for xm/xp packets
-   if (strcmp(packetName, "hm1") == 0 || strcmp(packetName, "hp1") == 0) {
-       tplus = simTime();
-       tout++;
-   } else if (strcmp(packetName, "hm2") == 0 || strcmp(packetName, "hp2") == 0) {
-       tminus = simTime();
-       tout++;
-   }
+        if(tout1==0){
+        if (strcmp(packetName, "hm1") == 0 || strcmp(packetName, "hp1") == 0 || strcmp(packetName, "xm1") == 0 || strcmp(packetName, "xp1") == 0) {
+            tplus = simTime();
+            tout1 = 1;
+            tout ++;
+            EV_INFO << "pkt1 rcvd" << std::endl;
+        }}
+        if(tout2==0){
+        if (strcmp(packetName, "hm2") == 0 || strcmp(packetName, "hp2") == 0 || strcmp(packetName, "xm2") == 0 || strcmp(packetName, "xp2") == 0) {
+            tminus = simTime();
+            tout2 = 1;
+            tout ++;
+            EV_INFO << "pkt2 rcvd" << std::endl;
+        }}
+
 
    // Once both arrive, compute TPLUS and TMINUS triggers
-       if (tout == 2) {
+       if (tout == 2 && tout1 ==1 && tout2==1) {
+           EV_INFO << "twp kts rcvd " << simTime() << "starttime is " << startTime << std::endl;
            tplus = std::max(0.0, tneg*(tplus - tminus).dbl());
            Tplus = startTime + tplus;
            Tminus = startTime - tplus;
            scheduleAt(Tplus, new cMessage("TPLUS"));
            scheduleAt(Tminus, new cMessage("TMINUS"));
+           tout ++;
        }
 
        // Parse and resolve destination addresses and ports
