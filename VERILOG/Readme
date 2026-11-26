@@ -1,1 +1,3 @@
+π² Processing-in-Interconnect: CBS and ATS Shaper RTL
 
+SystemVerilog RTL for the two Time-Sensitive Networking (TSN) traffic shapers used in the π² (Processing-in-Interconnect) paradigm, where the scheduling logic already present in Ethernet switches is repurposed to perform neural computation:
