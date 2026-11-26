@@ -1,3 +1,14 @@
-π² Processing-in-Interconnect: CBS and ATS Shaper RTL
+# π² Processing-in-Interconnect: CBS and ATS Shaper RTL
 
-SystemVerilog RTL for the two Time-Sensitive Networking (TSN) traffic shapers used in the π² (Processing-in-Interconnect) paradigm, where the scheduling logic already present in Ethernet switches is repurposed to perform neural computation:
+SystemVerilog RTL for the two Time-Sensitive Networking (TSN) traffic shapers used in the **π² (Processing-in-Interconnect)** paradigm, where the scheduling logic already present in Ethernet switches is repurposed to perform neural computation:
+
+| Module | Standard | π² role |
+|---|---|---|
+| `pi2_cbs` | IEEE 802.1Qav Credit-Based Shaper (CBS) | **π² neuron** (ReLU-like activation via credit accumulation) |
+| `pi2_ats_full` | IEEE 802.1Qcr Asynchronous Traffic Shaper (ATS) | **π² synapse** (weight applied as a timing delay on spikes/frames) |
+
+The idea is that routing energy becomes computation: a spiking/event-driven network can run on the interconnect itself, with only small extensions to standard shaper hardware.
+
+This RTL accompanies the paper:
+
+> M. Srivatsav, C. Bhattacharyya, S. Chakrabartty, and C. S. Thakur, *"When Routers, Switches and Interconnects Compute: A Processing-in-Interconnect Paradigm for Scalable Neuromorphic AI,"* arXiv:2508.19548, 2025.
